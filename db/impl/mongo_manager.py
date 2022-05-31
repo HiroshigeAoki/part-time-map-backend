@@ -30,7 +30,7 @@ class MongoManager(DatabaseManager):
         #TODO: 検索機能実装。
         criteria = (
             {
-                "loc": {"$geoWithin":{"$centerSphere": [query.center_loc['coordinates'], query.convert_radius(query.radius) / (6378.1 * 1000)]}},
+                "loc": {"$geoWithin":{"$centerSphere": [query.center_loc['coordinates'], query.radius / (6378.1 * 1000)]}},
             }
         )
         job_list = await self.db.item.find(criteria).to_list(1000)
