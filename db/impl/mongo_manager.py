@@ -1,11 +1,11 @@
 import logging
-from typing import List
+from typing import List, Dict
 
-from fastapi import Query
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
 from backend.db import DatabaseManager
 from backend.db.models import Job, OID
+from backend.query import Query
 
 
 class MongoManager(DatabaseManager):
@@ -28,12 +28,14 @@ class MongoManager(DatabaseManager):
 
     async def search(self, query: Query) -> List[Job]:
         #TODO: 検索機能実装。
-        jobs_list = []
-        item_q = self.db.item.find()
-        async for post in item_q:
-            jobs_list.append(Job(**post))
-        return jobs_list
-
+        criteria = (
+            {
+                "loc": {"$geoWithin":{"$centerSphere": [query.center_loc['coordinates'], query.convert_radius(query.radius) / (6378.1 * 1000)]}},
+            }
+        )
+        job_list = await self.db.item.find(criteria).to_list(1000)
+        return job_list
+            
     async def get_one_example(self) -> Job:
         job_q = await self.db.item.find_one()
         return Job(**job_q)
