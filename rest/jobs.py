@@ -14,7 +14,7 @@ async def get_one_example(db: DatabaseManager = Depends(get_database)) -> Job:
     job = await db.get_one_example()
     return job
 
-@router.post('/result')
+@router.post('/search')
 async def search(query: Query, db: DatabaseManager = Depends(get_database)) -> List[Job]:
     jobs = await db.search(query.str_to_int())
     return [Job(**job) for job in jobs]
