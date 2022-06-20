@@ -6,7 +6,6 @@ from backend.db.models import Job
 from backend.query import Query
 
 router = APIRouter()
-app = FastAPI()
 
 # for debug
 @router.get('/example')
