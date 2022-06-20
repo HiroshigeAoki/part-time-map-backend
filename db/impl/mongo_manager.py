@@ -39,13 +39,13 @@ class MongoManager(DatabaseManager):
         
         # TODO:範囲の広さは後でもっかい考える。
         if query.commute.time is None or query.commute.time == 5: # commuteが指定されていない時 or 5分圏内は、2km圏内のみ 
-            criteria_list.append({"loc": {"$geoWithin":{"$centerSphere": [query.center_loc['coordinates'], 2 / (6378.1 * 1000)]}}})
+            criteria_list.append({"loc": {"$geoWithin":{"$centerSphere": [query.origins['coordinates'], 2 / (6378.1 * 1000)]}}})
         elif query.commute.time == 10:
-            criteria_list.append({"loc": {"$geoWithin":{"$centerSphere": [query.center_loc['coordinates'], 10 / (6378.1 * 1000)]}}})
+            criteria_list.append({"loc": {"$geoWithin":{"$centerSphere": [query.origins['coordinates'], 10 / (6378.1 * 1000)]}}})
         elif query.commute.time == 20:
-            criteria_list.append({"loc": {"$geoWithin":{"$centerSphere": [query.center_loc['coordinates'], 15 / (6378.1 * 1000)]}}})
+            criteria_list.append({"loc": {"$geoWithin":{"$centerSphere": [query.origins['coordinates'], 15 / (6378.1 * 1000)]}}})
         elif query.commute.time == 30:
-            criteria_list.append({"loc": {"$geoWithin":{"$centerSphere": [query.center_loc['coordinates'], 20 / (6378.1 * 1000)]}}})
+            criteria_list.append({"loc": {"$geoWithin":{"$centerSphere": [query.origins['coordinates'], 20 / (6378.1 * 1000)]}}})
 
         criteria = {"$and": criteria_list}
         job_list = await self.db.item.find(criteria).to_list(1000)

@@ -1,5 +1,5 @@
 from typing import Dict, List
-from fastapi import APIRouter, Depends, FastAPI
+from fastapi import APIRouter, Depends, FastAPI, status, HTTPException
 
 from backend.db import DatabaseManager, get_database
 from backend.db.models import Job
@@ -18,4 +18,6 @@ async def get_one_example(db: DatabaseManager = Depends(get_database)) -> Job:
 async def search(query: Query, db: DatabaseManager = Depends(get_database)) -> List[Job]:
     query.str_to_int()
     jobs = await db.search(query)
+    if len(jobs) == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Job with given conditions not found.')
     return [Job(**job) for job in jobs]

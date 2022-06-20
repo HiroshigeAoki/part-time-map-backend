@@ -1,4 +1,5 @@
 from typing_extensions import LiteralString
+from wsgiref.validate import validator
 from pydantic import BaseModel, Field, root_validator
 from geojson import Point
 from typing import Literal, List
@@ -41,6 +42,14 @@ class Query(BaseModel):
     ] = Field(None, description='職種細分類')
     preferences: List[Literal["短期", "単発・1日OK", "長期歓迎", "春・夏・冬休み期間限定", "時間や曜日が選べる・シフト自由", "土日祝のみOK", "平日のみOK", "週1日からOK", "週2、3日からOK", "週4日以上OK", "時間固定シフト制", "シフト制", "早朝・朝の仕事", "昼からの仕事", "夕方からの仕事", "夜からの仕事", "深夜・夜勤の仕事", "短時間勤務(1日4h以内)", "フルタイム歓迎", "日払い", "週払い", "高収入・高額", "ボーナス・賞与あり", "給与前払いOK", "交通費支給", "まかない・食事補助あり", "社割あり", "研修あり", "資格取得支援制度", "残業なし", "社員登用あり", "送迎あり", "託児所あり", "寮・社宅・住宅手当あり", "産休・育休制度実績あり", "長期休暇あり", "無期雇用派遣", "無期雇用契約", "転勤・店舗異動なし", "職種変更なし", "高校生応援", "大学生歓迎", "未経験・初心者OK", "経験者・有資格者歓迎", "主婦・主夫歓迎", "扶養内勤務OK", "副業・WワークOK", "ブランクOK", "フリーター歓迎", "学歴不問", "ミドル活躍中", "シニア応援", "留学生歓迎", "オープニングスタッフ", "駅チカ・駅ナカ", "バイク通勤OK", "車通勤OK", "リゾート", "英語が活かせる", "在宅ワーク", "髪型・髪色自由", "服装自由", "髭・ネイル・ピアスOK", "制服あり", "履歴書不要", "入社祝い金支給", "即日勤務OK", "友達と応募OK"]
         ] = Field(None)
+    
+    #@validator('origins')
+    @root_validator
+    def valid_coordinates(cls, v):
+        lng, lat = v.get('origins').get('coordinates')
+        if not -180.0 <= lng <= 180 or not -90.0 <= lat <= 90:
+            raise ValueError(f"Invalid value 'origins'. lng({lng}) and lat({lat}) must be in -180<=lng<=180, -90<=lat<=90 respectively.")
+        return v
 
     # @root_validator
     # def radius_commute(cls, v):
@@ -54,16 +63,16 @@ class Query(BaseModel):
                     "origins": {
                         "type": "Point",
                         "coordinates": [
-                            34.8234,
-                            137.80694
+                            137.80694,
+                            34.8234
                         ]
                     },
                     "commute": {
                         "travelMode": "WALKING",
                         "time": "5分"
                     },
-                    "category": [
-                        "飲食/フードすべて"
+                    "jc": [
+                        "飲食/フード"
                     ],
                     "preferences": [
                         "長期歓迎"
