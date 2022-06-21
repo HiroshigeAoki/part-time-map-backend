@@ -1,8 +1,8 @@
-from typing_extensions import LiteralString
-from wsgiref.validate import validator
+from fastapi import status, HTTPException
 from pydantic import BaseModel, Field, root_validator
 from geojson import Point
-from typing import Literal, List
+from typing import Literal, List, Union
+import geocoder
 
 class Commute(BaseModel):
     travelMode: Literal['WALKING', 'BICYCLING','DRIVING', 'TRANSIT'] = Field(None, description='https://developers.google.com/maps/documentation/javascript/directions#TravelModes')
@@ -11,7 +11,7 @@ class Commute(BaseModel):
     @root_validator
     def is_both_filled(cls, v):
         if not all(v.values()):
-            raise ValueError('Both transp and time is required if either one is filled.')
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail='Both transp and time is required if either one is filled.')
         return v
 
 class Query(BaseModel):
@@ -46,9 +46,13 @@ class Query(BaseModel):
     #@validator('origins')
     @root_validator
     def valid_coordinates(cls, v):
-        lng, lat = v.get('origins').get('coordinates')
-        if not -180.0 <= lng <= 180 or not -90.0 <= lat <= 90:
-            raise ValueError(f"Invalid value 'origins'. lng({lng}) and lat({lat}) must be in -180<=lng<=180, -90<=lat<=90 respectively.")
+        origins = Point.to_instance(v.get('origins'))
+        if isinstance(origins, Point):
+            lng, lat = origins.get('coordinates')
+            if not -180.0 <= lng <= 180 or not -90.0 <= lat <= 90:
+                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Invalid value 'origins'. lng({lng}) and lat({lat}) must be in -180<=lng<=180, -90<=lat<=90 respectively.")
+        else:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f'origins must be geojson Point instance. {type(origins)} instance ({origins}) is given.')
         return v
 
     # @root_validator
@@ -63,20 +67,17 @@ class Query(BaseModel):
                     "origins": {
                         "type": "Point",
                         "coordinates": [
-                            137.80694,
-                            34.8234
+                            138.4331,
+                            34.9635
                         ]
                     },
                     "commute": {
                         "travelMode": "WALKING",
-                        "time": "5分"
+                        "time": "30分"
                     },
                     "jc": [
                         "飲食/フード"
                     ],
-                    "preferences": [
-                        "長期歓迎"
-                    ]
                 }
             ]
         }
