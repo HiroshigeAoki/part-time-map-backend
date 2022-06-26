@@ -4,9 +4,9 @@ import pandas as pd
 
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
-from backend.db import DatabaseManager
-from backend.db.models import Job, OID
-from backend.query import Query
+from api.db import DatabaseManager
+from api.db.models import Job, OID
+from api.query import Query
 
 
 class MongoManager(DatabaseManager):

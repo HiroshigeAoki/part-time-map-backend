@@ -2,22 +2,23 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from backend.config import get_config
-from backend.db import db
-from backend.rest import jobs
+from api.config import get_config
+from api.db import db
+from api.rest import jobs
 
 app = FastAPI(title='part-time-map')
 
 origins = [
     "http://localhost",
-    "http://localhost:8080",
+    "http://localhost:8000",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["POST", "GET"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 

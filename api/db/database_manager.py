@@ -3,8 +3,8 @@ from abc import abstractmethod
 from typing import List, Literal
 from geojson import Point
 
-from backend.db.models import Job, OID
-from backend.query import Query
+from api.db.models import Job, OID
+from api.query import Query
 
 
 class DatabaseManager(object):

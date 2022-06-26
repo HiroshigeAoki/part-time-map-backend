@@ -1,9 +1,9 @@
 from typing import Dict, List
-from fastapi import APIRouter, Depends, FastAPI, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException
 
-from backend.db import DatabaseManager, get_database
-from backend.db.models import Job
-from backend.query import Query
+from api.db import DatabaseManager, get_database
+from api.db.models import Job
+from api.query import Query
 
 router = APIRouter()
 
