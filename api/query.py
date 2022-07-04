@@ -1,7 +1,7 @@
 from fastapi import status, HTTPException
-from pydantic import BaseModel, Field, root_validator
+from pydantic import BaseModel, Field, root_validator, validate_arguments
 from geojson import Point
-from typing import Literal, List, Union
+from typing import Dict, Literal, List
 import geocoder
 
 class Commute(BaseModel):
@@ -15,7 +15,7 @@ class Commute(BaseModel):
         return v
 
 class Query(BaseModel):
-    origins: Point = Field(description='geojson')
+    origins: Dict = Field(description='{"lat": -180<=lng<=180, "lng": -90<=lat<=90}')
     # radius: Literal['300m', '500m', '1km', '2km', '3km', '5km', '10km', '15km', '20km', '30km'] = Field('2km', description='radiusかcoummuteどちらか一つのみ。')
     commute: Commute = Field(None)
     jc: List[Literal["飲食/フード", "販売", "接客/サービス", "レジャー/エンタメ", "営業", "事務", "総務/企画", "教育", "物流/配送", "軽作業", "建築/土木/建設", "工場/製造", "IT/コンピュータ", "医療/介護/福祉", "マスコミ/出版", "芸能", "ガールズバー/キャバクラ/パブ/クラブ", "専門職/その他"]] = Field(None, description='職種')
@@ -43,16 +43,17 @@ class Query(BaseModel):
     preferences: List[Literal["短期", "単発・1日OK", "長期歓迎", "春・夏・冬休み期間限定", "時間や曜日が選べる・シフト自由", "土日祝のみOK", "平日のみOK", "週1日からOK", "週2、3日からOK", "週4日以上OK", "時間固定シフト制", "シフト制", "早朝・朝の仕事", "昼からの仕事", "夕方からの仕事", "夜からの仕事", "深夜・夜勤の仕事", "短時間勤務(1日4h以内)", "フルタイム歓迎", "日払い", "週払い", "高収入・高額", "ボーナス・賞与あり", "給与前払いOK", "交通費支給", "まかない・食事補助あり", "社割あり", "研修あり", "資格取得支援制度", "残業なし", "社員登用あり", "送迎あり", "託児所あり", "寮・社宅・住宅手当あり", "産休・育休制度実績あり", "長期休暇あり", "無期雇用派遣", "無期雇用契約", "転勤・店舗異動なし", "職種変更なし", "高校生応援", "大学生歓迎", "未経験・初心者OK", "経験者・有資格者歓迎", "主婦・主夫歓迎", "扶養内勤務OK", "副業・WワークOK", "ブランクOK", "フリーター歓迎", "学歴不問", "ミドル活躍中", "シニア応援", "留学生歓迎", "オープニングスタッフ", "駅チカ・駅ナカ", "バイク通勤OK", "車通勤OK", "リゾート", "英語が活かせる", "在宅ワーク", "髪型・髪色自由", "服装自由", "髭・ネイル・ピアスOK", "制服あり", "履歴書不要", "入社祝い金支給", "即日勤務OK", "友達と応募OK"]
         ] = Field(None)
     
-    #@validator('origins')
     @root_validator
     def valid_coordinates(cls, v):
-        origins = Point.to_instance(v.get('origins'))
-        if isinstance(origins, Point):
-            lng, lat = origins.get('coordinates')
+        try:
+            if not "lng" in v["origins"].keys() and not "lat" in v["origins"].keys():
+                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Invalid value 'origins'.")
+            lng, lat = v["origins"]["lng"], v["origins"]["lat"]
             if not -180.0 <= lng <= 180 or not -90.0 <= lat <= 90:
                 raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Invalid value 'origins'. lng({lng}) and lat({lat}) must be in -180<=lng<=180, -90<=lat<=90 respectively.")
-        else:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f'origins must be geojson Point instance. {type(origins)} instance ({origins}) is given.')
+            v["origins"] = Point((lng, lat))
+        except ValueError as e:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=(e))
         return v
 
     # @root_validator
