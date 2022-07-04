@@ -1,17 +1,18 @@
 from fastapi import status, HTTPException
 from pydantic import BaseModel, Field, root_validator, validate_arguments
 from geojson import Point
-from typing import Dict, Literal, List
+from typing import Dict, Literal, List, TypedDict
 import geocoder
 
 class Commute(BaseModel):
     travelMode: Literal['WALKING', 'BICYCLING','DRIVING', 'TRANSIT'] = Field(None, description='https://developers.google.com/maps/documentation/javascript/directions#TravelModes')
-    time: Literal['5分', '10分', '20分', '30分'] = Field(None, description='通勤時間。選択肢は仮。')
+    time: Literal["5", "10", "20", "30"] = Field(None, description='通勤時間。選択肢は仮。')
     
     @root_validator
     def is_both_filled(cls, v):
         if not all(v.values()):
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail='Both transp and time is required if either one is filled.')
+        v["time"] = int(v["time"])
         return v
 
 class Query(BaseModel):
@@ -82,7 +83,3 @@ class Query(BaseModel):
                 }
             ]
         }
-    def str_to_int(self):
-        # self.radius = int(self.radius.replace('km', '000').replace('m', '00'))
-        self.commute.time = int(self.commute.time.replace('分', ''))
-        
