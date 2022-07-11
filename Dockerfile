@@ -10,14 +10,11 @@ ENV TZ Asia/Tokyo
 
 WORKDIR /code/backend
 
-# Setup python venv
-RUN python -m venv venv
-RUN . /code/backend/venv/bin/activate
-RUN pip install --upgrade pip
-
 # Install dependencies
 COPY requirements.txt .
-RUN  pip install -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
+
 COPY . .
 
 CMD ["/bin/bash", "startup.sh"]

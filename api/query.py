@@ -12,7 +12,6 @@ class Commute(BaseModel):
     def is_both_filled(cls, v):
         if not all(v.values()):
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail='Both transp and time is required if either one is filled.')
-        v["time"] = int(v["time"])
         return v
 
 class Query(BaseModel):
@@ -52,7 +51,6 @@ class Query(BaseModel):
             lng, lat = v["origins"]["lng"], v["origins"]["lat"]
             if not -180.0 <= lng <= 180 or not -90.0 <= lat <= 90:
                 raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=f"Invalid value 'origins'. lng({lng}) and lat({lat}) must be in -180<=lng<=180, -90<=lat<=90 respectively.")
-            v["origins"] = Point((lng, lat))
         except ValueError as e:
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=(e))
         return v
@@ -61,8 +59,13 @@ class Query(BaseModel):
     # def radius_commute(cls, v):
     #     if all(v.values()) or not any(v.values()):
     #         raise ValueError('Either radius or commute is required and not both.')
+    def setup(self):
+        # self.radius = int(self.radius.replace('km', '000').replace('m', '00'))
+        self.commute.time = int(self.commute.time)
+        self.origins = Point((self.origins["lng"], self.origins["lat"]))        
         
     class Config:
+        orm_mode=True
         schema_extra = {
             "examples": [
                 {

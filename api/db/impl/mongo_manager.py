@@ -30,7 +30,7 @@ class MongoManager(DatabaseManager):
     async def search(self, query: Query) -> List[Job]:
         #TODO: 検索機能実装。
         criteria_list = []
-        if query.preferences:
+        if query.preferences: # listに入っていなかった条件をデータベースから抽出して、既存のやつに変換するのをクローリングの時か検索の時かどちらかでやる。
             criteria_list.extend([{"preferences":{"$in":[pref]}} for pref in query.preferences])
         elif query.jc:
             criteria_list.extend([{"jc":{"$in":[jc]}} for jc in query.jc])

@@ -15,6 +15,7 @@ async def get_one_example(db: DatabaseManager = Depends(get_database)) -> Job:
 
 @router.post('/search')
 async def search(query: Query, db: DatabaseManager = Depends(get_database)) -> List[Job]:
+    query.setup()
     jobs = await db.search(query)
     if len(jobs) == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Job with given conditions not found.')
