@@ -5,7 +5,7 @@ from typing import Dict, Literal, List, TypedDict
 import geocoder
 
 class Commute(BaseModel):
-    travelMode: Literal['WALKING', 'BICYCLING','DRIVING', 'TRANSIT'] = Field(None, description='https://developers.google.com/maps/documentation/javascript/directions#TravelModes')
+    travelMode: Literal['walking', 'bicycling','driving', 'transit'] = Field(None)
     time: Literal["5", "10", "20", "30"] = Field(None, description='通勤時間。選択肢は仮。')
     
     @root_validator
