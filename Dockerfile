@@ -17,5 +17,5 @@ RUN pip install --upgrade pip && \
 
 COPY . .
 
-CMD ["/bin/bash", "startup.sh"]
+CMD [ "uvicorn", "api.main:app", "--reload","--host", "0.0.0.0", "--port", "8000"]
 EXPOSE 8000
