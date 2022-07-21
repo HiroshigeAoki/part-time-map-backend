@@ -63,6 +63,8 @@ class MongoManager(DatabaseManager):
         def get_coordinates(series):
             return f"{series.get('coordinates')[1]},{series.get('coordinates')[0]}"
 
+        if len(job_list) == 0:
+            return []
         job_df = pd.DataFrame(job_list)
         job_df["coord"] = job_df["loc"].apply(get_coordinates)
         durations = []
