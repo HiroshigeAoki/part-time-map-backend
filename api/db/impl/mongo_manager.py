@@ -77,7 +77,7 @@ class MongoManager(DatabaseManager):
                 + f"?origins={query.origins['coordinates'][1]},{query.origins['coordinates'][0]}" \
                 + f"&destinations={destinations}" \
                 + f"&mode={query.commute.travelMode}" \
-                + f"&key={os.environ['API_KEY']}"
+                + f"&key={os.environ['MONGO_API_KEY']}"
             response = json.loads(requests.request("GET", url).text)
             if len(response['rows']) == 0:
                 raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'Distance Matrix returns nothing.')

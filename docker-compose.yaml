@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  backend:
+    build: .
+    volumes:
+      - .:/code
+    expose:
+      - 8000
+    ports:
+      - 8000:8000
+    depends_on:
+      - mongo
+    env_file:
+      - .env
+
+  mongo:
+    image: mongo
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - 27017:27017 # remove this line on prod
